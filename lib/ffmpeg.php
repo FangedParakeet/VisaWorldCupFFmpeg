@@ -5,10 +5,11 @@ class Ffmpeg extends Slave {
 	const CHROMAKEY = "00FF00",
 		VISA_LOGO = "videos/local/visa.mp4";
 
-	private $_ffmpeg_path;
+	private $_ffmpeg_path, $_escape_char;
 
-	public function __construct($path){
+	public function __construct($path, $esc){
 		$this->_ffmpeg_path = $path;
+		$this->_escape_char = $esc;
 	}
 
 	public function getFields($fields){
@@ -23,7 +24,7 @@ class Ffmpeg extends Slave {
 			throw new Exception("Could not find chromakey video");
 		}
 
-		$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $chromaVid ." -filter_complex '[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]' -map '[out]' " . $outputFilename;
+		$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $chromaVid ." -filter_complex " . $this->_escape_char ."[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]" . $this->_escape_char . " -map " . $this->_escape_char . "[out]" . $this->_escape_char ." " . $outputFilename;
 
 		// Add logging
 		$result = exec($command, $error, $status);

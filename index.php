@@ -8,7 +8,8 @@
 	$message = "Saul Goodman";
 
 	$ffmpegPath = $config["ffmpegPath"];
-	$ffmpeg = new Ffmpeg($ffmpegPath);
+	$escapeChar = $config["escapeChar"];
+	$ffmpeg = new Ffmpeg($ffmpegPath, $escapeChar);
 
 	try {
 		// Add name, email
