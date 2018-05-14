@@ -1,0 +1,63 @@
+<?php
+
+class Ffmpeg extends Slave {
+
+	const CHROMAKEY = "00FF00",
+		VISA_LOGO = "videos/local/visa.mp4";
+
+	private $_ffmpeg_path;
+
+	public function __construct($path){
+		$this->_ffmpeg_path = $path;
+	}
+
+	public function getFields($fields){
+		return $this->checkGet($fields);
+	}
+
+	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult.mp4"){
+		if(!file_exists($video)){
+			throw new Exception("Could not find capture video");
+		}
+		if(!file_exists($chromaVid)){
+			throw new Exception("Could not find chromakey video");
+		}
+
+		$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $chromaVid ." -filter_complex '[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]' -map '[out]' " . $outputFilename;
+
+		// Add logging
+		$result = exec($command, $error, $status);
+
+		return $outputFilename;
+	}
+
+	public function addVideoBookend($video, $salt = "SODEAU"){
+		if(!file_exists($video)){
+			throw new Exception("Could not find source video");
+		}
+
+		$id = $salt . time();
+		$outputFilename = "videos/user/" . $id . ".mp4";
+
+		$temp1 = $this->_ffmpeg_path . " -i " . self::VISA_LOGO . " -c copy -bsf:v h264_mp4toannexb -f mpegts videos/user/" . $id . "1.ts";
+		$temp2 = $this->_ffmpeg_path . " -i " . $video . " -c copy -bsf:v h264_mp4toannexb -f mpegts videos/user/" . $id . "2.ts";
+
+		$command = $this->_ffmpeg_path . " -i \"concat:videos/user/" . $id ."1.ts|videos/user/" . $id ."2.ts|videos/user/" . $id ."1.ts\" -bsf:a aac_adtstoasc " . $outputFilename;
+
+		// Add logging
+		$result = exec($temp1, $error, $status);
+		$result = exec($temp2, $error, $status);
+
+		$result = exec($command, $error, $status);
+
+		$this->removeTempFiles($id);
+
+		return $outputFilename;
+	}
+
+	private function removeTempFiles($id){
+		unlink("videos/user/" . $id . "1.ts");
+		unlink("videos/user/" . $id . "2.ts");
+	}
+
+}
