@@ -18,10 +18,10 @@ class Ffmpeg extends Slave {
 
 	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult.mp4"){
 		if(!file_exists($video)){
-			throw new Exception("Could not find capture video");
+			throw new Exception("Could not find capture video: " . $video);
 		}
 		if(!file_exists($chromaVid)){
-			throw new Exception("Could not find chromakey video");
+			throw new Exception("Could not find chromakey video: " . $chromaVid);
 		}
 
 		$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $chromaVid ." -filter_complex " . $this->_escape_char ."[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]" . $this->_escape_char . " -map " . $this->_escape_char . "[out]" . $this->_escape_char ." " . $outputFilename;
@@ -34,7 +34,7 @@ class Ffmpeg extends Slave {
 
 	public function addVideoBookend($video, $salt = "SODEAU"){
 		if(!file_exists($video)){
-			throw new Exception("Could not find source video");
+			throw new Exception("Could not find source video: " . $video);
 		}
 
 		$id = $salt . time();
