@@ -6,6 +6,7 @@
 
 	$status = true;
 	$message = "Saul Goodman";
+	$finalVideo = "";
 
 	$ffmpegPath = $config["ffmpegPath"];
 	$escapeChar = $config["escapeChar"];
@@ -13,10 +14,10 @@
 
 	try {
 		// Add name, email
-		list($video, $chroma) = $ffmpeg->getFields(array("video", "chroma"));
+		list($video, $chroma, $name, $email) = $ffmpeg->getFields(array("video", "chroma", "name", "email"));
 
-		$mergedVideo = $ffmpeg->chromakeyVideoMerge($video, $chroma);
-		$finalVideo = $ffmpeg->addVideoBookend($mergedVideo);
+		$mergedVideo = $ffmpeg->chromakeyVideoMerge($video, $chroma, $name);
+		$finalVideo = $ffmpeg->addVideoBookend($mergedVideo, $name);
 
 		unlink($mergedVideo);
 	} catch(Exception $e){
@@ -27,5 +28,6 @@
 	header("Content-type: application/json");
 	echo json_encode(array(
 		"status" => $status,
-		"message" => $message
+		"message" => $message,
+		"video" => $finalVideo
 	));

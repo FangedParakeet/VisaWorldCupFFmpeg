@@ -13,16 +13,23 @@ class Ffmpeg extends Slave {
 	}
 
 	public function getFields($fields){
-		return $this->checkGet($fields);
+		list($video, $chroma, $name, $email) = $this->checkGet($fields);
+		$this->checkEmpty(array($video, $chroma, $name, $email));
+		$this->checkEmail(array($email));
+		$name = preg_replace('/\s+/', '', $name);
+		
+		return array($video, $chroma, $name, $email);
 	}
 
-	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult.mp4"){
+	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult"){
 		if(!file_exists($video)){
 			throw new Exception("Could not find capture video: " . $video);
 		}
 		if(!file_exists($chromaVid)){
 			throw new Exception("Could not find chromakey video: " . $chromaVid);
 		}
+
+		$outputFilename .= ".mp4";
 
 		$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $chromaVid ." -filter_complex " . $this->_escape_char ."[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]" . $this->_escape_char . " -map " . $this->_escape_char . "[out]" . $this->_escape_char ." " . $outputFilename;
 
