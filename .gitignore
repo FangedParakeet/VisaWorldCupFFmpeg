@@ -7,5 +7,6 @@ ehthumbs.db
 Thumbs.db
 
 lib/config.php
+lib/task.log
 videos/local/*
 videos/user/*
