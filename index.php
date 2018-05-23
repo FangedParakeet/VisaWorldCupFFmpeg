@@ -1,25 +1,22 @@
 <?php
 
 	require_once("lib/config.php");
+	require_once("lib/db.php");
 	require_once("lib/slave.php");
-	require_once("lib/ffmpeg.php");
+	require_once("lib/dispatcher.php");
+
+	date_default_timezone_set($config["timezone"]);
 
 	$status = true;
 	$message = "Saul Goodman";
-	$finalVideo = "";
+	$jobId = "";
 
-	$ffmpegPath = $config["ffmpegPath"];
-	$escapeChar = $config["escapeChar"];
-	$ffmpeg = new Ffmpeg($ffmpegPath, $escapeChar);
+	$dispatcher = new Dispatcher($dbh);
 
 	try {
-		// Add name, email
-		list($video, $chroma, $name, $email) = $ffmpeg->getFields(array("video", "chroma", "name", "email"));
+		
+		$jobId = $dispatcher->enqueueJob();
 
-		$mergedVideo = $ffmpeg->chromakeyVideoMerge($video, $chroma, $name);
-		$finalVideo = $ffmpeg->addVideoBookend($mergedVideo, $name);
-
-		unlink($mergedVideo);
 	} catch(Exception $e){
 		$status = false;
 		$message = $e->getMessage();
@@ -29,5 +26,5 @@
 	echo json_encode(array(
 		"status" => $status,
 		"message" => $message,
-		"video" => $finalVideo
+		"jobId" => $jobId
 	));

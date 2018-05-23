@@ -1,26 +1,33 @@
 <?php
 
-	$ffmpegPath = "/usr/local/bin/ffmpeg";
+	require_once("lib/config.php");
+	require_once("lib/slave.php");
+	require_once("lib/ffmpeg.php");
 
+	$status = true;
+	$message = "Saul Goodman";
+	$finalVideo = "";
 
-	// Green screen video
-	$green = "greenzlat.mp4";
-	$video = "rcjod.mp4";
-	$output = "newresult.mp4";
+	$ffmpegPath = $config["ffmpegPath"];
+	$escapeChar = $config["escapeChar"];
+	$ffmpeg = new Ffmpeg($ffmpegPath, $escapeChar);
 
-	$command = $ffmpegPath . " -i " . $video . " -i " . $green ." -filter_complex '[1:v]colorkey=0x00FF00:0.3:0.2[ckout];[0:v][ckout]overlay[out]' -map '[out]' " . $output;
+	try {
+		// Add name, email
+		list($video, $chroma, $name, $email) = $ffmpeg->getFields(array("video", "chroma", "name", "email"));
 
-	$result = exec($command, $error, $status);
+		$mergedVideo = $ffmpeg->chromakeyVideoMerge($video, $chroma, $name);
+		$finalVideo = $ffmpeg->addVideoBookend($mergedVideo, $name);
 
-	// Concatenate video
-	$visa = "visa.mp4";
+		unlink($mergedVideo);
+	} catch(Exception $e){
+		$status = false;
+		$message = $e->getMessage();
+	}
 
-	$cmd1 = $ffmpegPath . " -i " . $visa . " -c copy -bsf:v h264_mp4toannexb -f mpegts intermediate1.ts";
-	$cmd2 = $ffmpegPath . " -i " . $output . " -c copy -bsf:v h264_mp4toannexb -f mpegts intermediate2.ts";
-	$cmd3 = $ffmpegPath . " -i \"concat:intermediate1.ts|intermediate2.ts|intermediate1.ts\" -bsf:a aac_adtstoasc output.mp4";
-
-	$result = exec($cmd1);
-	$result = exec($cmd2);
-	$result = exec($cmd3);
-
-	echo $cmd3;
+	header("Content-type: application/json");
+	echo json_encode(array(
+		"status" => $status,
+		"message" => $message,
+		"video" => $finalVideo
+	));
