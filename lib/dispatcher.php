@@ -51,6 +51,16 @@ class Dispatcher extends Slave {
 		return;
 	}
 
+	public function getJobs(){
+		$get = $this->_dbh->prepare("SELECT `jobId`, `status`, `statusCode`, `webcamVideo`, `arVideo`, `finalVideo`, 
+			`finalLink`, `name`, `email` FROM `jobs` WHERE `statusCode` > 0 
+			ORDER BY `statusCode` DESC, `dateModified` ASC");
+		$get->execute();
+		$jobs = $get->fetchAll();
+
+		return $jobs;
+	}
+
 	private function createJob($id, $video, $chromaVid, $name, $email){
 		$now = time();
 
@@ -73,7 +83,7 @@ class Dispatcher extends Slave {
 	}
 
 	private function getJob($id){
-		$get = $this->_dbh->prepare("SELECT `jobId`, `status`, `statusCode`, `finalVideo`, `dateAdded`, `dateModified` 
+		$get = $this->_dbh->prepare("SELECT `jobId`, `status`, `statusCode`, `finalVideo`, `finalLink`, `dateAdded`, `dateModified` 
 			FROM `jobs` WHERE `jobId` = :jobId LIMIT 1");
 		$get->execute(array("jobId" => $id));
 

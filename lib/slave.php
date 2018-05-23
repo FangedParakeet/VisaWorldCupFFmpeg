@@ -96,7 +96,7 @@ class Slave {
 
 	protected function checkFilepathExists($values){
 		foreach ($values as $key => $value) {
-			if(file_exists($value)){
+			if(!file_exists($value)){
 				throw new Exception("Could not find file at: " . $value, 0);
 			}
 		}

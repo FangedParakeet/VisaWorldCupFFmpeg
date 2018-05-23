@@ -12,6 +12,7 @@
 	$statusMessage = "";
 	$statusCode = -1;
 	$video = "";
+	$link = "";
 	$dateAdded = "";
 	$dateModified = "";
 
@@ -24,6 +25,7 @@
 		$statusMessage = $job["status"];
 		$statusCode = intval($job["statusCode"]);
 		$video = is_null($job["finalVideo"]) ? "" : $job["finalVideo"];
+		$link = is_null($job["finalLink"]) ? "" : $job["finalLink"];
 		$dateAdded = $job["dateAdded"];
 		$dateModified = $job["dateModified"];
 
@@ -39,6 +41,7 @@
 		"jobStatus" => $statusMessage,
 		"jobStatusCode" => $statusCode,
 		"video" => $video,
+		"link" => $link,
 		"dateAdded" => $dateAdded,
 		"dateModified" => $dateModified
 	));

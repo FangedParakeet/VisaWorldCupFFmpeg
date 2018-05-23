@@ -23,10 +23,10 @@ class Ffmpeg extends Slave {
 
 	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult"){
 		if(!file_exists($video)){
-			throw new Exception("Could not find capture video: " . $video);
+			throw new Exception("Could not find webcam video: " . $video);
 		}
 		if(!file_exists($chromaVid)){
-			throw new Exception("Could not find chromakey video: " . $chromaVid);
+			throw new Exception("Could not find AR video: " . $chromaVid);
 		}
 
 		$outputFilename .= ".mp4";
@@ -39,12 +39,11 @@ class Ffmpeg extends Slave {
 		return $outputFilename;
 	}
 
-	public function addVideoBookend($video, $salt = "SODEAU"){
+	public function addVideoBookend($video, $id = "SODEAU"){
 		if(!file_exists($video)){
 			throw new Exception("Could not find source video: " . $video);
 		}
 
-		$id = $salt . time();
 		$outputFilename = "videos/user/" . $id . ".mp4";
 
 		$temp1 = $this->_ffmpeg_path . " -i " . self::VISA_LOGO . " -c copy -bsf:v h264_mp4toannexb -f mpegts videos/user/" . $id . "1.ts";
