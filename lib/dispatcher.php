@@ -12,6 +12,7 @@ class Dispatcher extends Slave {
 		list($video, $chromaVid, $name, $email) = $this->checkGet(array("video", "chroma", "name", "email"));
 		$this->checkEmpty(array($video, $chromaVid, $name, $email));
 		$this->checkEmail(array($email));
+		$this->checkFilepathExists(array($video, $chromaVid));
 
 		$id = $this->generateId($name);
 
