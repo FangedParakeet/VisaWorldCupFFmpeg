@@ -6,6 +6,7 @@
 	require_once(dirname(__FILE__) . "/lib/slave.php");
 	require_once(dirname(__FILE__) . "/lib/ffmpeg.php");
 	require_once(dirname(__FILE__) . "/lib/dispatcher.php");
+	require_once(dirname(__FILE__) . "/lib/mailgun.php");
 	require_once(dirname(__FILE__) . "/lib/logger.php");
 
 	date_default_timezone_set($config["timezone"]);
@@ -120,7 +121,15 @@
 
 					}
 
-					
+					$logger->message($job["jobId"], "Sending email...");
+
+					$mailgun = new Mailgun($config["mailgun_api_key"], $config["mailgun_domain"]);
+					$mailgun->send($job["email"], $finalLink);
+
+					$dispatcher->updateJob($job["jobId"], array(
+						"statusCode" => 0,
+						"status" => "Finished"
+					));
 					break;
 
 			}
@@ -135,4 +144,3 @@
 	}
 
 	$logger->close();
-
