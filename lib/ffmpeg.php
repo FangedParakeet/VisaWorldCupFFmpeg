@@ -5,11 +5,13 @@ class Ffmpeg extends Slave {
 	const CHROMAKEY = "00FF00",
 		VISA_LOGO = "videos/local/visa.mp4";
 
-	private $_ffmpeg_path, $_escape_char;
+	private $_ffmpeg_path, $_escape_char, $_webcam, $_audio;
 
-	public function __construct($path, $esc){
+	public function __construct($path, $esc, $webcam = null, $audio = null){
 		$this->_ffmpeg_path = $path;
 		$this->_escape_char = $esc;
+		$this->_webcam = $webcam;
+		$this->_audio = $audio;
 	}
 
 	public function getFields($fields){
@@ -19,6 +21,16 @@ class Ffmpeg extends Slave {
 		$name = preg_replace('/\s+/', '', $name);
 		
 		return array($video, $chroma, $name, $email);
+	}
+
+	public function recordWebcam(){
+		$output = "videos/local/" . time() . "visa.mp4";
+		while(file_exists($output)){
+			$output = "videos/local/" . time() . "visa.mp4";
+		}
+		$command = $this->_ffmpeg_path . ' -f dshow -video_size 640x480 -framerate 30 -pixel_format yuyv422 -i video="' . $this->_webcam .'":audio="' . $this->_audio .'" -y -t 00:00:10 ' . $output;
+
+		return $output;
 	}
 
 	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult"){
