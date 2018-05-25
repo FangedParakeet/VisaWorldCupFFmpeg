@@ -1,13 +1,13 @@
 <?php 
 
-	require_once(realpath(__DIR__ . "/lib/config.php"));
-	require_once(realpath(__DIR__ . "/lib/db.php"));
-	require_once(realpath(__DIR__ . "/lib/aws/aws-autoloader.php"));
-	require_once(realpath(__DIR__ . "/lib/slave.php"));
-	require_once(realpath(__DIR__ . "/lib/ffmpeg.php"));
-	require_once(realpath(__DIR__ . "/lib/dispatcher.php"));
-	require_once(realpath(__DIR__ . "/lib/mailgun.php"));
-	require_once(realpath(__DIR__ . "/lib/logger.php"));
+	require_once("./lib/config.php");
+	require_once("./lib/db.php");
+	require_once("./lib/aws/aws-autoloader.php");
+	require_once("./lib/slave.php");
+	require_once("./lib/ffmpeg.php");
+	require_once("./lib/dispatcher.php");
+	require_once("./lib/mailgun.php");
+	require_once("./lib/logger.php");
 
 	date_default_timezone_set($config["timezone"]);
 
@@ -42,9 +42,9 @@
 					if(is_null($job["combinedVideo"])){
 						$logger->message($job["jobId"], "Combining webcam and AR video...");
 
-						$webcamVideo = realpath(__DIR__ . "/" . $job["webcamVideo"]);
-						$arVideo = realpath(__DIR__ . "/" . $job["arVideo"]);
-						$outVideo = realpath(__DIR__ . "/videos/user/" . $job["jobId"] . "-alpha");
+						$webcamVideo = "./" . $job["webcamVideo"];
+						$arVideo = "./" . $job["arVideo"];
+						$outVideo = "./videos/user/" . $job["jobId"] . "-alpha";
 
 						$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $outVideo);
 						if(!file_exists($mergedVideo)){
@@ -97,7 +97,7 @@
 						$result = $s3->putObject(array(
 						    'Bucket'     => $awsBucket,
 						    'Key'        => basename($job["finalVideo"]),
-						    'SourceFile' => realpath(__DIR__ . "/" . $job["finalVideo"]),
+						    'SourceFile' => "./" . $job["finalVideo"],
 						));
 
 						if(isset($result["ObjectURL"])){
