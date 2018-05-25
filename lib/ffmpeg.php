@@ -56,12 +56,15 @@ class Ffmpeg extends Slave {
 			throw new Exception("Could not find source video: " . $video);
 		}
 
-		$outputFilename = "videos/user/" . $id . ".mp4";
+		$outputFilename = dirname(__FILE__) . "/../videos/user/" . $id . ".mp4";
+		$visaLogo = dirname(__FILE__) . "/../" . self::VISA_LOGO;
+		$tempOut1 = dirname(__FILE__) . "/../videos/user/" . $id . "1.ts";
+		$tempOut2 = dirname(__FILE__) . "/../videos/user/" . $id . "2.ts";
 
-		$temp1 = $this->_ffmpeg_path . " -i " . self::VISA_LOGO . " -c copy -bsf:v h264_mp4toannexb -f mpegts videos/user/" . $id . "1.ts";
-		$temp2 = $this->_ffmpeg_path . " -i " . $video . " -c copy -bsf:v h264_mp4toannexb -f mpegts videos/user/" . $id . "2.ts";
+		$temp1 = $this->_ffmpeg_path . " -i " . $visaLogo . " -c copy -bsf:v h264_mp4toannexb -f mpegts " . $tempOut1;
+		$temp2 = $this->_ffmpeg_path . " -i " . $video . " -c copy -bsf:v h264_mp4toannexb -f mpegts " . $tempOut2;
 
-		$command = $this->_ffmpeg_path . " -i \"concat:videos/user/" . $id ."1.ts|videos/user/" . $id ."2.ts|videos/user/" . $id ."1.ts\" -bsf:a aac_adtstoasc " . $outputFilename;
+		$command = $this->_ffmpeg_path . " -i \"concat:" . $tempOut1 ."|" . $tempOut2 ."|" . $tempOut2 ."\" -bsf:a aac_adtstoasc " . $outputFilename;
 
 		// Add logging
 		$result = exec($temp1, $error, $status);
@@ -69,14 +72,11 @@ class Ffmpeg extends Slave {
 
 		$result = exec($command, $error, $status);
 
-		$this->removeTempFiles($id);
+		unlink($tempOut1);
+		unlink($tempOut2);
 
 		return $outputFilename;
 	}
 
-	private function removeTempFiles($id){
-		unlink("videos/user/" . $id . "1.ts");
-		unlink("videos/user/" . $id . "2.ts");
-	}
 
 }

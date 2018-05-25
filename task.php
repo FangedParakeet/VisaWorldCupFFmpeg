@@ -97,7 +97,7 @@
 						$result = $s3->putObject(array(
 						    'Bucket'     => $awsBucket,
 						    'Key'        => basename($job["finalVideo"]),
-						    'SourceFile' => dirname(__FILE__) . "/" . $job["finalVideo"],
+						    'SourceFile' => $job["finalVideo"],
 						));
 
 						if(isset($result["ObjectURL"])){
