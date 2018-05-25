@@ -97,7 +97,7 @@ class Dispatcher extends Slave {
 			$id = md5(preg_replace('/\s+/', '', $name) . time());
 
 			$get = $this->_dbh->prepare("SELECT `jobId` FROM `jobs` WHERE `jobId` = :jobId");
-			$get->execute(array("jobId" => $jobId));
+			$get->execute(array("jobId" => $id));
 
 			$results = $get->fetchAll();
 		} while(count($results) > 0);
