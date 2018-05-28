@@ -24,11 +24,12 @@ class Ffmpeg extends Slave {
 	}
 
 	public function recordWebcam(){
-		$output = "videos/local/" . time() . "visa.mp4";
+		$output = dirname(__FILE__) . "/videos/local/" . time() . "visa.mp4";
 		while(file_exists($output)){
-			$output = "videos/local/" . time() . "visa.mp4";
+			$output = dirname(__FILE__) . "/videos/local/" . time() . "visa.mp4";
 		}
-		$command = $this->_ffmpeg_path . ' -f dshow -video_size 640x480 -framerate 30 -pixel_format yuyv422 -i video="' . $this->_webcam .'":audio="' . $this->_audio .'" -y -t 00:00:10 ' . $output;
+
+		$command = $this->_ffmpeg_path . " -f dshow -video_size 1280x720 -framerate 30 -pixel_format yuv420p -i video=\"" . $this->_webcam ."\":audio=\"" . $this->_audio ."\" -y -t 00:00:10 " . $output;
 
 		return $output;
 	}
