@@ -33,6 +33,7 @@ class Ffmpeg extends Slave {
 
 		// $result = exec($command, $error, $status);
 		$exec = popen("start /B " . $command, "r");
+		pclose($exec);
 
 		return $output;
 	}
