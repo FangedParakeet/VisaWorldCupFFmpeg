@@ -29,7 +29,7 @@ class Ffmpeg extends Slave {
 			$output = dirname(__FILE__) . "/../videos/local/" . time() . "visa.mp4";
 		}
 
-		$command = $this->_ffmpeg_path . " -f dshow -video_size 1280x720 -framerate 30 -pixel_format yuv420p -i video=\"" . $this->_webcam ."\":audio=\"" . $this->_audio ."\" -y -t 00:00:10 " . $output;
+		$command = $this->_ffmpeg_path . " -f dshow -video_size 1280x720 -framerate 30 -pixel_format yuv420p -i video=\"" . $this->_webcam ."\":audio=\"" . $this->_audio ."\" -y -t 00:00:10 " . $output . " > " . dirname(__FILE__) . "/ffmpeg.log &";
 
 		$result = exec($command, $error, $status);
 
