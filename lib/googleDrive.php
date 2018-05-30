@@ -3,10 +3,17 @@
 class GoogleDrive {
 
 	const REFRESH_TOKEN = "1/vYXJgQVx2ZQhXq1v52rC3mM7fVrBqWJHGyw0ErmVAjzIEbxZyRtC5MPCXW4XjA1a",
-		CLIENT_ID = "410793983125-ieqoi40s75ibddarjc0c9n3vv6or6cfl.apps.googleusercontent.com",
-		CLIENT_SECRET = "irPphNuXYK2G1Ya851p7eaYb",
 		REFRESH_URL = "https://www.googleapis.com/oauth2/v4/token",
-		UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+		UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+		CREDENTIALS_FILE = "~/.google/credentials.ini";
+
+	private $_client_id, $_client_secret;
+
+	public function __construct(){
+		$credentials = parse_ini_file(self::CREDENTIALS_FILE);
+		$this->_client_id = $credentials["client_id"];
+		$this->_client_secret = $credentials["client_secret"];
+	}
 
 	public function uploadMedia($media){
 		$token = $this->getAccessToken();
@@ -22,8 +29,8 @@ class GoogleDrive {
 		curl_setopt($ch, CURLOPT_URL, self::REFRESH_URL);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
 			"grant_type" => "refresh_token",
-			"client_id" => self::CLIENT_ID,
-			"client_secret" => self::CLIENT_SECRET,
+			"client_id" => $this->_client_id,
+			"client_secret" => $this->_client_secret,
 			"refresh_token" => self::REFRESH_TOKEN
 		)));
 
