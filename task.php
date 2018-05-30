@@ -89,12 +89,11 @@
 						$drive = new GoogleDrive();
 						$result = $drive->uploadMedia($job["finalVideo"]);
 
-
 						if(isset($result["id"])){
 
 							$logger->message($job["jobId"], "Video uploaded successfully!");
 
-							$finalLink = $result["ObjectURL"];
+							$finalLink = "https://drive.google.com/file/d/" . $result["id"] . "/edit?usp=sharing";
 
 							$dispatcher->updateJob($job["jobId"], array(
 								"finalLink" => $finalLink
@@ -103,6 +102,7 @@
 						} else {
 
 							$logger->error($job["jobId"], "Video upload failed!");
+							break;
 
 						}
 					} else {
@@ -113,27 +113,32 @@
 
 					$logger->message($job["jobId"], "Sending email...");
 
-					$mail = new PHPMailer(true);                              // Passing `true` enables exceptions
+					$credentials = parse_ini_file(__DIR__ . "/../../.credentials/google.ini", true);
+					$username = $credentials["mail"]["username"];
+					$password = $credentials["mail"]["password"];
 
-				    //Server settings
-				    $mail->isSMTP();                                      // Set mailer to use SMTP
-				    $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
-				    $mail->SMTPAuth = true;                               // Enable SMTP authentication
-				    $mail->Username = 'noreply@visaexperiences.inition.co.uk';                 // SMTP username
-				    $mail->Password = 'OnAFreeFromPSG';                           // SMTP password
-				    $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-				    $mail->Port = 587;                                    // TCP port to connect to
+					$mail = new PHPMailer(true); // Passing `true` enables exceptions
 
-				    //Recipients
-				    $mail->setFrom('noreply@visaexperiences.inition.co.uk', 'Zlatan');
+				    $mail->IsSMTP(); // enable SMTP
+				    $mail->SMTPDebug = 1; // debugging: 1 = errors and messages, 2 = messages only
+				    $mail->SMTPAuth = true; // authentication enabled
+				    $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
+				    $mail->Host = "smtp.gmail.com";
+				    $mail->Port = 465; // or 587
+				    $mail->IsHTML(true);
+				    $mail->Username = $username;                 // SMTP username
+				    $mail->Password = $password;                        // SMTP password
+				    $mail->SetFrom($username, "Zlatan");
+				    $mail->Subject = 'Shooting for the Stars Video';
+				    $mail->Body    = '<a href="' . $finalLink . '" target="_blank">CLICK TO DOWNLOAD VIDEO!</a>';
 				    $mail->addAddress($job["email"], $job["name"]);     // Add a recipient
 
-				    //Content
-				    $mail->isHTML(true);                                  // Set email format to HTML
-				    $mail->Subject = 'Shooting for the Stars Video';
-				    $mail->Body    = '<a href="' . $job["finalLink"] . '" target="_blank">CLICK TO DOWNLOAD VIDEO!</a>';
-
 				    $mail->send();
+
+				    $dispatcher->updateJob($job["jobId"], array(
+				    	"statusCode" => 0,
+				    	"status" => "Finished"
+				    ));
 					break;
 
 			}

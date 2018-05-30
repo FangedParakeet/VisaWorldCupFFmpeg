@@ -5,14 +5,14 @@ class GoogleDrive {
 	const REFRESH_TOKEN = "1/vYXJgQVx2ZQhXq1v52rC3mM7fVrBqWJHGyw0ErmVAjzIEbxZyRtC5MPCXW4XjA1a",
 		REFRESH_URL = "https://www.googleapis.com/oauth2/v4/token",
 		UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-		CREDENTIALS_FILE = "~/.google/credentials.ini";
+		CREDENTIALS_FILE = "/../../../.credentials/google.ini";
 
 	private $_client_id, $_client_secret;
 
 	public function __construct(){
-		$credentials = parse_ini_file(self::CREDENTIALS_FILE);
-		$this->_client_id = $credentials["client_id"];
-		$this->_client_secret = $credentials["client_secret"];
+		$credentials = parse_ini_file(__DIR__ . self::CREDENTIALS_FILE, true);
+		$this->_client_id = $credentials["drive"]["client_id"];
+		$this->_client_secret = $credentials["drive"]["client_secret"];
 	}
 
 	public function uploadMedia($media){
@@ -73,7 +73,7 @@ class GoogleDrive {
 		$response = curl_exec($ch);
 		curl_close($ch);
 
-		return $response;
+		return json_decode($response, true);
 	}
 
 
