@@ -1,27 +1,18 @@
 <?php 
 
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\Exception;
+
 	require_once(dirname(__FILE__) . "/lib/config.php");
 	require_once(dirname(__FILE__) . "/lib/db.php");
-	require_once(dirname(__FILE__) . "/lib/aws/aws-autoloader.php");
 	require_once(dirname(__FILE__) . "/lib/slave.php");
 	require_once(dirname(__FILE__) . "/lib/ffmpeg.php");
+	require_once(dirname(__FILE__) . "/lib/googleDrive.php");
 	require_once(dirname(__FILE__) . "/lib/dispatcher.php");
-	require_once(dirname(__FILE__) . "/lib/mailgun.php");
 	require_once(dirname(__FILE__) . "/lib/logger.php");
+	require_once(dirname(__FILE__) . "/vendor/autoload.php");
 
 	date_default_timezone_set($config["timezone"]);
-
-	use Aws\S3\S3Client;
-	use Aws\S3\Exception\S3Exception;
-
-	$awsBucket = $config["awsBucket"];
-	$awsRegion = $config["awsRegion"];
-	                        
-	$s3 = new S3Client([
-	    'version' => 'latest',
-	    'region'  => $awsRegion,
-	    'profile' => 'default'
-	]);
 
 	$logger = new Logger($config["logfile"]);
 
@@ -31,6 +22,7 @@
 
 	$dispatcher = new Dispatcher($dbh);
 	$jobs = $dispatcher->getJobs();
+
 
 	foreach ($jobs as $job) {
 		try {
@@ -89,18 +81,16 @@
 					));
 					break;
 
-				// Video merge complete, upload to S3, send email
+				// Video merge complete, upload to Google, send email
 				case 2:
 					if(is_null($job["finalLink"])){
-						$logger->message($job["jobId"], "Uploading final video to S3...");
+						$logger->message($job["jobId"], "Uploading final video to Google Drive...");
 
-						$result = $s3->putObject(array(
-						    'Bucket'     => $awsBucket,
-						    'Key'        => basename($job["finalVideo"]),
-						    'SourceFile' => $job["finalVideo"],
-						));
+						$drive = new GoogleDrive();
+						$result = $drive->uploadMedia($job["finalVideo"]);
 
-						if(isset($result["ObjectURL"])){
+
+						if(isset($result["id"])){
 
 							$logger->message($job["jobId"], "Video uploaded successfully!");
 
@@ -123,13 +113,10 @@
 
 					$logger->message($job["jobId"], "Sending email...");
 
-					$mailgun = new Mailgun($config["mailgun_api_key"], $config["mailgun_domain"]);
-					$mailgun->send($job["email"], $finalLink);
-
-					$dispatcher->updateJob($job["jobId"], array(
-						"statusCode" => 0,
-						"status" => "Finished"
-					));
+					// $dispatcher->updateJob($job["jobId"], array(
+					// 	"statusCode" => 0,
+					// 	"status" => "Finished"
+					// ));
 					break;
 
 			}
