@@ -3,7 +3,8 @@
 class Ffmpeg extends Slave {
 
 	const CHROMAKEY = "00FF00",
-		VISA_LOGO = "videos/local/visa.mp4";
+		VISA_LOGO_START = "videos/local/VisaStart.ts",
+		VISA_LOGO_END = "videos/local/VisaEnd.ts";
 
 	private $_ffmpeg_path, $_escape_char, $_webcam, $_audio;
 
@@ -62,23 +63,19 @@ class Ffmpeg extends Slave {
 		}
 
 		$outputFilename = dirname(__FILE__) . "/../videos/user/" . $id . ".mp4";
-		$visaLogo = dirname(__FILE__) . "/../" . self::VISA_LOGO;
-		$tempOut1 = dirname(__FILE__) . "/../videos/user/" . $id . "1.ts";
-		$tempOut2 = dirname(__FILE__) . "/../videos/user/" . $id . "2.ts";
+		$visaLogo1 = dirname(__FILE__) . "/../" . self::VISA_LOGO_START;
+		$visaLogo2 = dirname(__FILE__) . "/../" . self::VISA_LOGO_END;
+		$tempOut = dirname(__FILE__) . "/../videos/user/" . $id . ".ts";
 
-		$temp1 = $this->_ffmpeg_path . " -i " . $visaLogo . " -c copy -bsf:v h264_mp4toannexb -f mpegts " . $tempOut1;
-		$temp2 = $this->_ffmpeg_path . " -i " . $video . " -c copy -bsf:v h264_mp4toannexb -f mpegts " . $tempOut2;
+		$temp = $this->_ffmpeg_path . " -i " . $video . " -c copy -bsf:v h264_mp4toannexb -f mpegts " . $tempOut;
 
-		$command = $this->_ffmpeg_path . " -i \"concat:" . $tempOut1 ."|" . $tempOut2 ."|" . $tempOut2 ."\" -bsf:a aac_adtstoasc " . $outputFilename;
+		$command = $this->_ffmpeg_path . " -i \"concat:" . $visaLogo1 ."|" . $tempOut ."|" . $visaLogo2 ."\" -bsf:a aac_adtstoasc " . $outputFilename;
 
 		// Add logging
-		$result = exec($temp1, $error, $status);
-		$result = exec($temp2, $error, $status);
-
+		$result = exec($temp, $error, $status);
 		$result = exec($command, $error, $status);
 
-		unlink($tempOut1);
-		unlink($tempOut2);
+		unlink($tempOut);
 
 		return $outputFilename;
 	}
