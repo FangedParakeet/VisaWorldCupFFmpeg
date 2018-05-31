@@ -8,5 +8,6 @@ Thumbs.db
 
 lib/config.php
 lib/task.log
+lib/ffmpeg.log
 videos/user/*
 vendor/*

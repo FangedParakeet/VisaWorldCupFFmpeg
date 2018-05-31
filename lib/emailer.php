@@ -12,30 +12,37 @@ class Emailer {
 
 	private $_username, $_password, $_client;
 
-	public function __construct($client){
+	public function __construct(){
 		$credentials = parse_ini_file(__DIR__ . self::CREDENTIALS_FILE, true);
-		
+
 		$this->_username = $credentials["mail"]["username"];
 		$this->_password = $credentials["mail"]["password"];
-
-		$this->_client = $client;
 	}
 
 	public function send($name, $email, $link){
-	    $this->_client->IsSMTP(); // enable SMTP
-	    $this->_client->SMTPDebug = 1; // debugging: 1 = errors and messages, 2 = messages only
-	    $this->_client->SMTPAuth = true; // authentication enabled
-	    $this->_client->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
-	    $this->_client->Host = self::SMTP;
-	    $this->_client->Port = 465; // or 587
-	    $this->_client->IsHTML(true);
-	    $this->_client->Username = $this->_username;                 // SMTP username
-	    $this->_client->Password = $this->_password;                           // SMTP password
-	    $this->_client->SetFrom($this->_username, self::FROM);
-	    $this->_client->Subject = self::SUBJECT;
-	    $this->_client->Body    = '<a href="' . $link . '" target="_blank">CLICK TO DOWNLOAD VIDEO!</a>';
-	    $this->_client->addAddress($email, $name);     // Add a recipient
+			$mail = new PHPMailer(true); // Passing `true` enables exceptions
 
-	    $client->send();
+			ob_start();
+			include(__DIR__ . "/template.php");
+			$body = ob_get_contents();
+			ob_end_clean();
+
+		    $mail->IsSMTP(); // enable SMTP
+		    $mail->SMTPDebug = 1; // debugging: 1 = errors and messages, 2 = messages only
+		    $mail->SMTPAuth = true; // authentication enabled
+		    $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
+		    $mail->Host = self::SMTP;
+		    $mail->Port = 465; // or 587
+		    $mail->IsHTML(true);
+		    $mail->Username = $this->_username;                 // SMTP username
+		    $mail->Password = $this->_password;                        // SMTP password
+		    $mail->SetFrom($this->_username, self::FROM);
+		    $mail->Subject = self::SUBJECT;
+		    $mail->Body    = $body;
+		    $mail->addAddress($email, $name);     // Add a recipient
+
+		    $mail->send();
+		    return;
 	}
+
 }

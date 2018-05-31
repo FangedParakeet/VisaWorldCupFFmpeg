@@ -8,6 +8,7 @@
 	require_once(dirname(__FILE__) . "/lib/slave.php");
 	require_once(dirname(__FILE__) . "/lib/ffmpeg.php");
 	require_once(dirname(__FILE__) . "/lib/googleDrive.php");
+	require_once(dirname(__FILE__) . "/lib/emailer.php");
 	require_once(dirname(__FILE__) . "/lib/dispatcher.php");
 	require_once(dirname(__FILE__) . "/lib/logger.php");
 	require_once(dirname(__FILE__) . "/vendor/autoload.php");
@@ -113,27 +114,9 @@
 
 					$logger->message($job["jobId"], "Sending email...");
 
-					$credentials = parse_ini_file(__DIR__ . "/../../.credentials/google.ini", true);
-					$username = $credentials["mail"]["username"];
-					$password = $credentials["mail"]["password"];
+					$email = new Emailer();
+					$email->send($job["name"], $job["email"], $finalLink);
 
-					$mail = new PHPMailer(true); // Passing `true` enables exceptions
-
-				    $mail->IsSMTP(); // enable SMTP
-				    $mail->SMTPDebug = 1; // debugging: 1 = errors and messages, 2 = messages only
-				    $mail->SMTPAuth = true; // authentication enabled
-				    $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for Gmail
-				    $mail->Host = "smtp.gmail.com";
-				    $mail->Port = 465; // or 587
-				    $mail->IsHTML(true);
-				    $mail->Username = $username;                 // SMTP username
-				    $mail->Password = $password;                        // SMTP password
-				    $mail->SetFrom($username, "Zlatan");
-				    $mail->Subject = 'Shooting for the Stars Video';
-				    $mail->Body    = '<a href="' . $finalLink . '" target="_blank">CLICK TO DOWNLOAD VIDEO!</a>';
-				    $mail->addAddress($job["email"], $job["name"]);     // Add a recipient
-
-				    $mail->send();
 
 				    $dispatcher->updateJob($job["jobId"], array(
 				    	"statusCode" => 0,
