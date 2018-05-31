@@ -24,7 +24,6 @@
 	$dispatcher = new Dispatcher($dbh);
 	$jobs = $dispatcher->getJobs();
 
-
 	foreach ($jobs as $job) {
 		try {
 
@@ -93,6 +92,10 @@
 						if(isset($result["id"])){
 
 							$logger->message($job["jobId"], "Video uploaded successfully!");
+
+							if(intval($job["toBeDeleted"])){
+								unlink($job["finalVideo"]);
+							}
 
 							$finalLink = "https://drive.google.com/file/d/" . $result["id"] . "/edit?usp=sharing";
 

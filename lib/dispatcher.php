@@ -14,6 +14,8 @@ class Dispatcher extends Slave {
 		$this->checkEmail(array($email));
 		$this->checkFilepathExists(array($chromaVid));
 
+		$deleteAfter = isset($_GET["deleteAfter"]) ? 1:0;
+
 		$index = intval($video);
 		if($index < 1 || $index > 3){
 			throw new Exception("Webcam video index must be in range of 1-3");
@@ -28,7 +30,7 @@ class Dispatcher extends Slave {
 
 		$id = $this->generateId($name);
 
-		$this->createJob($id, $newVideo, $newChroma, $name, $email);
+		$this->createJob($id, $newVideo, $newChroma, $name, $email, $deleteAfter);
 
 		return $id;
 	}
@@ -65,7 +67,7 @@ class Dispatcher extends Slave {
 
 	public function getJobs(){
 		$get = $this->_dbh->prepare("SELECT `jobId`, `status`, `statusCode`, `webcamVideo`, `arVideo`, `finalVideo`, 
-			`finalLink`, `name`, `email` FROM `jobs` WHERE `statusCode` > 0 
+			`finalLink`, `name`, `email`, `toBeDeleted` FROM `jobs` WHERE `statusCode` > 0 
 			ORDER BY `statusCode` DESC, `dateModified` ASC");
 		$get->execute();
 		$jobs = $get->fetchAll();
@@ -73,12 +75,12 @@ class Dispatcher extends Slave {
 		return $jobs;
 	}
 
-	private function createJob($id, $video, $chromaVid, $name, $email){
+	private function createJob($id, $video, $chromaVid, $name, $email, $deleteAfter){
 		$now = time();
 
 		$create = $this->_dbh->prepare("INSERT INTO `jobs` (`jobId`, `status`, `statusCode`, `webcamVideo`, 
-			`arVideo`, `name`, `email`, `dateAdded`, `dateModified`) 
-			VALUES (:jobId, :status, :statusCode, :webcamVideo, :arVideo, :name, :email, :dateAdded, :dateModified)");
+			`arVideo`, `name`, `email`, `toBeDeleted`, `dateAdded`, `dateModified`) 
+			VALUES (:jobId, :status, :statusCode, :webcamVideo, :arVideo, :name, :email, :deleteAfter, :dateAdded, :dateModified)");
 		$create->execute(array(
 			"jobId" 		=> $id,
 			"status" 		=> "Ready",
@@ -87,6 +89,7 @@ class Dispatcher extends Slave {
 			"arVideo" 		=> $chromaVid,
 			"name" 			=> $name,
 			"email" 		=> $email,
+			"deleteAfter" 	=> $deleteAfter,
 			"dateAdded" 	=> date("Y-m-d H:i:s", $now),
 			"dateModified" 	=> date("Y-m-d H:i:s", $now)
 		));
