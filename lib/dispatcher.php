@@ -12,7 +12,12 @@ class Dispatcher extends Slave {
 		list($video, $chromaVid, $name, $email) = $this->checkGet(array("video", "chroma", "name", "email"));
 		$this->checkEmpty(array($video, $chromaVid, $name, $email));
 		$this->checkEmail(array($email));
-		$this->checkFilepathExists(array($video, $chromaVid));
+		$this->checkFilepathExists(array($chromaVid));
+
+		$index = intval($video);
+		if($index < 1 || $index > 3){
+			throw new Exception("Webcam video index must be in range of 1-3");
+		}
 
 		$id = $this->generateId($name);
 

@@ -41,7 +41,8 @@ class Ffmpeg extends Slave {
 		return $output;
 	}
 
-	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult"){
+	public function chromakeyVideoMerge($videoIndex, $chromaVid, $outputFilename = "videos/user/chResult"){
+		$video = dirname(__FILE__) . "/../videos/local/webcam_SFTS_" . $videoIndex . ".mp4";
 		if(!file_exists($video)){
 			throw new Exception("Could not find webcam video: " . $video);
 		}

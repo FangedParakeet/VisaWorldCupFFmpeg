@@ -35,11 +35,11 @@
 					if(is_null($job["combinedVideo"])){
 						$logger->message($job["jobId"], "Combining webcam and AR video...");
 
-						$webcamVideo = dirname(__FILE__) . "/" . $job["webcamVideo"];
+						$webcamVideoIndex = $job["webcamVideo"];
 						$arVideo = dirname(__FILE__) . "/" . $job["arVideo"];
 						$outVideo = dirname(__FILE__) . "/videos/user/" . $job["jobId"] . "-alpha";
 
-						$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $outVideo);
+						$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideoIndex, $arVideo, $outVideo);
 						if(!file_exists($mergedVideo)){
 							$error = "Failed to combine webcam and AR video!";
 							$logger->error($job["jobId"], $error);
