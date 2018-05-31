@@ -36,7 +36,7 @@
 						$logger->message($job["jobId"], "Combining webcam and AR video...");
 
 						$webcamVideoIndex = $job["webcamVideo"];
-						$arVideo = dirname(__FILE__) . "/" . $job["arVideo"];
+						$arVideo = $job["arVideo"];
 						$outVideo = dirname(__FILE__) . "/videos/user/" . $job["jobId"] . "-alpha";
 
 						$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideoIndex, $arVideo, $outVideo);
