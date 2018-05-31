@@ -19,9 +19,16 @@ class Dispatcher extends Slave {
 			throw new Exception("Webcam video index must be in range of 1-3");
 		}
 
+		$video = dirname(__FILE__) . "/../videos/user/webcam_SFTS_" . $video . ".mp4";
+
+		$newVideo = dirname(__FILE__) . "/../videos/user/webcam_USER_" . time() . ".mp4";
+		$newChroma = dirname(__FILE__) . "/../videos/user/AR_Video_USER_" . time() . ".mp4";
+		rename($video, $newVideo);
+		rename($chromaVid, $newChroma);
+
 		$id = $this->generateId($name);
 
-		$this->createJob($id, $video, $chromaVid, $name, $email);
+		$this->createJob($id, $newVideo, $newChroma, $name, $email);
 
 		return $id;
 	}

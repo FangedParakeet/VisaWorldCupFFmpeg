@@ -27,7 +27,7 @@ class Ffmpeg extends Slave {
 	public function recordWebcam(){
 		list($index) = $this->checkget(array("index"));
 
-		$output = dirname(__FILE__) . "/../videos/local/webcam_SFTS_" . $index .".mp4";
+		$output = dirname(__FILE__) . "/../videos/user/webcam_SFTS_" . $index .".mp4";
 		if(file_exists($output)){
 			unlink($output);
 		}
@@ -41,8 +41,7 @@ class Ffmpeg extends Slave {
 		return $output;
 	}
 
-	public function chromakeyVideoMerge($videoIndex, $chromaVid, $outputFilename = "videos/user/chResult"){
-		$video = dirname(__FILE__) . "/../videos/local/webcam_SFTS_" . $videoIndex . ".mp4";
+	public function chromakeyVideoMerge($video, $chromaVid, $outputFilename = "videos/user/chResult"){
 		if(!file_exists($video)){
 			throw new Exception("Could not find webcam video: " . $video);
 		}
@@ -56,6 +55,9 @@ class Ffmpeg extends Slave {
 
 		// Add logging
 		$result = exec($command, $error, $status);
+
+		unlink($video);
+		unlink($chromaVid);
 
 		return $outputFilename;
 	}
