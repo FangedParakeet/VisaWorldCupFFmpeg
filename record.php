@@ -14,6 +14,7 @@
 	$escapeChar = $config["escapeChar"];
 	$webcam = $config["webcam"];
 	$audio = $config["audio"];
+	$framerate = $config["framerate"];
 	$ffmpeg = new Ffmpeg($ffmpegPath, $escapeChar, $webcam, $audio);
 
 	try {
