@@ -6,14 +6,15 @@ class Ffmpeg extends Slave {
 		VISA_LOGO_START = "videos/local/VisaStart.ts",
 		VISA_LOGO_END = "videos/local/VisaEnd.ts";
 
-	private $_ffmpeg_path, $_escape_char, $_webcam, $_audio, $_framerate;
+	private $_ffmpeg_path, $_escape_char, $_webcam, $_audio, $_framerate, $_pixel;
 
-	public function __construct($path, $esc, $webcam = null, $audio = null, $framerate = null){
+	public function __construct($path, $esc, $webcam = null, $audio = null, $framerate = null, $pixel = null){
 		$this->_ffmpeg_path = $path;
 		$this->_escape_char = $esc;
 		$this->_webcam = $webcam;
 		$this->_audio = $audio;
 		$this->_framerate = $framerate;
+		$this->_pixel = $pixel;
 	}
 
 	public function getFields($fields){
@@ -33,7 +34,7 @@ class Ffmpeg extends Slave {
 			unlink($output);
 		}
 
-		$command = $this->_ffmpeg_path . " -f dshow -video_size 1280x720 -framerate " . $this->_framerate . " -pixel_format yuv420p -i video=\"" . $this->_webcam ."\":audio=\"" . $this->_audio ."\" -y -t 00:00:10 " . $output . " > " . dirname(__FILE__) . "/ffmpeg.log 2>nul";
+		$command = $this->_ffmpeg_path . " -f dshow -video_size 1280x720 -framerate " . $this->_framerate . " -pixel_format " . $this->_pixel . " -i video=\"" . $this->_webcam ."\":audio=\"" . $this->_audio ."\" -y -t 00:00:10 " . $output . " > " . dirname(__FILE__) . "/ffmpeg.log 2>nul";
 
 		// $result = exec($command, $error, $status);
 		$exec = popen("start /B " . $command, "r");

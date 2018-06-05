@@ -15,7 +15,8 @@
 	$webcam = $config["webcam"];
 	$audio = $config["audio"];
 	$framerate = $config["framerate"];
-	$ffmpeg = new Ffmpeg($ffmpegPath, $escapeChar, $webcam, $audio);
+	$pixel = $config["pixel"];
+	$ffmpeg = new Ffmpeg($ffmpegPath, $escapeChar, $webcam, $audio, $framerate, $pixel);
 
 	try {
 		
