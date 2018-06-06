@@ -17,7 +17,7 @@
 
 		$jobId = $dispatcher->enqueueJob();
 
-		$command = "php " . dirname(__FILE__) . "/task.php > " . dirname(__FILE__) . "/lib/ffmpeg.log 2>nul";
+		$command = "C:\\xampp\\php\\php " . dirname(__FILE__) . "/task.php";
 		$exec = popen("start /B " . $command, "r");
 		pclose($exec);
 
