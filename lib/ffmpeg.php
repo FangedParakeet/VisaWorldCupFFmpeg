@@ -34,7 +34,7 @@ class Ffmpeg extends Slave {
 			unlink($output);
 		}
 
-		$command = $this->_ffmpeg_path . " -f dshow -video_size 1280x720 -framerate " . $this->_framerate . " " . $this->_pixel_codec . " -i video=\"" . $this->_webcam ." -y -t 00:00:10 " . $output . " > " . dirname(__FILE__) . "/ffmpeg.log 2>nul";
+		$command = $this->_ffmpeg_path . " -f dshow -video_size 1280x720 -framerate " . $this->_framerate . " " . $this->_pixel_codec . " -i video=\"" . $this->_webcam ."\" -y -t 00:00:10 " . $output . " > " . dirname(__FILE__) . "/ffmpeg.log 2>nul";
 
 		// $result = exec($command, $error, $status);
 		$exec = popen("start /B " . $command, "r");
