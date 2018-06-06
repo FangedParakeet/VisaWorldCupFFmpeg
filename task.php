@@ -127,12 +127,14 @@
 						$email = new Emailer();
 						$email->send($job["name"], $job["email"], $finalLink);
 
+						$logger->message($job["jobId"], "Email sent successfully!");
 
 					    $dispatcher->updateJob($job["jobId"], array(
 					    	"statusCode" => 0,
 					    	"status" => "Finished",
 					    	"dateModified" => date("Y-m-d H:i:s")
 					    ));
+						$logger->message($job["jobId"], "Job complete!");
 						break;
 
 				}
