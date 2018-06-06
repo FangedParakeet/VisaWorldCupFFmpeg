@@ -24,118 +24,131 @@
 	$dispatcher = new Dispatcher($dbh);
 	$jobs = $dispatcher->getJobs();
 
-	foreach ($jobs as $job) {
-		try {
+	while(count($jobs) > 0){
 
-			switch(intval($job["statusCode"])){
+		foreach ($jobs as $job) {
+			try {
 
-				// Videos ready for merge
-				case 1:
-					if(is_null($job["combinedVideo"])){
-						$logger->message($job["jobId"], "Combining webcam and AR video...");
+				switch(intval($job["statusCode"])){
 
-						$webcamVideo = $job["webcamVideo"];
-						$arVideo = $job["arVideo"];
-						$outVideo = dirname(__FILE__) . "/videos/user/" . $job["jobId"] . "-alpha";
+					// Videos ready for merge
+					case 1:
+						if(is_null($job["combinedVideo"])){
+							$logger->message($job["jobId"], "Combining webcam and AR video...");
 
-						$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $outVideo);
-						if(!file_exists($mergedVideo)){
-							$error = "Failed to combine webcam and AR video!";
+							$webcamVideo = $job["webcamVideo"];
+							$arVideo = $job["arVideo"];
+							$outVideo = dirname(__FILE__) . "/videos/user/" . $job["jobId"] . "-alpha";
+
+							$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $outVideo);
+							if(!file_exists($mergedVideo)){
+								$error = "Failed to combine webcam and AR video!";
+								$logger->error($job["jobId"], $error);
+
+								$dispatcher->updateJob($job["jobId"], array(
+									"statusCode" => -1,
+									"status" => $error,
+									"dateModified" => date("Y-m-d H:i:s")
+								));
+								break;
+							}
+							$dispatcher->updateJob($job["jobId"], array(
+								"combinedVideo" => $mergedVideo,
+								"dateModified" => date("Y-m-d H:i:s")
+							));
+						} else {
+							$mergedVideo = $job["combinedVideo"];
+						}
+
+						$logger->message($job["jobId"], "Adding VISA logo to video...");
+
+						$finalVideo = $ffmpeg->addVideoBookend($mergedVideo, $job["jobId"]);
+						if(!file_exists($finalVideo)){
+							$error = "Failed to add client logo to video!";
 							$logger->error($job["jobId"], $error);
 
 							$dispatcher->updateJob($job["jobId"], array(
 								"statusCode" => -1,
-								"status" => $error
+								"status" => $error,
+								"dateModified" => date("Y-m-d H:i:s")
 							));
-							break;
+							break;						
 						}
-						$dispatcher->updateJob($job["jobId"], array(
-							"combinedVideo" => $mergedVideo
-						));
-					} else {
-						$mergedVideo = $job["combinedVideo"];
-					}
 
-					$logger->message($job["jobId"], "Adding VISA logo to video...");
+						$logger->message($job["jobId"], "Final video complete!");
 
-					$finalVideo = $ffmpeg->addVideoBookend($mergedVideo, $job["jobId"]);
-					if(!file_exists($finalVideo)){
-						$error = "Failed to add client logo to video!";
-						$logger->error($job["jobId"], $error);
+						unlink($mergedVideo);
 
 						$dispatcher->updateJob($job["jobId"], array(
-							"statusCode" => -1,
-							"status" => $error
+							"statusCode" => 2,
+							"status" => "Video Ready",
+							"finalVideo" => $finalVideo,
+							"dateModified" => date("Y-m-d H:i:s")
 						));
-						break;						
-					}
+						break;
 
-					$logger->message($job["jobId"], "Final video complete!");
+					// Video merge complete, upload to Google, send email
+					case 2:
+						if(is_null($job["finalLink"])){
+							$logger->message($job["jobId"], "Uploading final video to Google Drive...");
 
-					unlink($mergedVideo);
+							$drive = new GoogleDrive();
+							$result = $drive->uploadMedia($job["finalVideo"]);
 
-					$dispatcher->updateJob($job["jobId"], array(
-						"statusCode" => 2,
-						"status" => "Video Ready",
-						"finalVideo" => $finalVideo
-					));
-					break;
+							if(isset($result["id"])){
 
-				// Video merge complete, upload to Google, send email
-				case 2:
-					if(is_null($job["finalLink"])){
-						$logger->message($job["jobId"], "Uploading final video to Google Drive...");
+								$logger->message($job["jobId"], "Video uploaded successfully!");
 
-						$drive = new GoogleDrive();
-						$result = $drive->uploadMedia($job["finalVideo"]);
+								if(intval($job["toBeDeleted"])){
+									unlink($job["finalVideo"]);
+								}
 
-						if(isset($result["id"])){
+								$finalLink = "https://drive.google.com/file/d/" . $result["id"] . "/edit?usp=sharing";
 
-							$logger->message($job["jobId"], "Video uploaded successfully!");
+								$dispatcher->updateJob($job["jobId"], array(
+									"finalLink" => $finalLink,
+									"dateModified" => date("Y-m-d H:i:s")
+								));	
 
-							if(intval($job["toBeDeleted"])){
-								unlink($job["finalVideo"]);
+							} else {
+
+								$logger->error($job["jobId"], "Video upload failed!");
+								break;
+
 							}
-
-							$finalLink = "https://drive.google.com/file/d/" . $result["id"] . "/edit?usp=sharing";
-
-							$dispatcher->updateJob($job["jobId"], array(
-								"finalLink" => $finalLink
-							));	
-
 						} else {
 
-							$logger->error($job["jobId"], "Video upload failed!");
-							break;
+							$finalLink = $job["finalLink"];
 
 						}
-					} else {
 
-						$finalLink = $job["finalLink"];
+						$logger->message($job["jobId"], "Sending email...");
 
-					}
-
-					$logger->message($job["jobId"], "Sending email...");
-
-					$email = new Emailer();
-					$email->send($job["name"], $job["email"], $finalLink);
+						$email = new Emailer();
+						$email->send($job["name"], $job["email"], $finalLink);
 
 
-				    $dispatcher->updateJob($job["jobId"], array(
-				    	"statusCode" => 0,
-				    	"status" => "Finished"
-				    ));
-					break;
+					    $dispatcher->updateJob($job["jobId"], array(
+					    	"statusCode" => 0,
+					    	"status" => "Finished",
+					    	"dateModified" => date("Y-m-d H:i:s")
+					    ));
+						break;
 
+				}
+
+				
+			} catch(Exception $e){
+				$logger->error($job["jobId"], $e->getMessage());
+				$dispatcher->updateJob($job["jobId"], array(
+					"statusCode" => -1,
+					"status" => $e->getMessage()
+				));
 			}
-			
-		} catch(Exception $e){
-			$logger->error($job["jobId"], $e->getMessage());
-			$dispatcher->updateJob($job["jobId"], array(
-				"statusCode" => -1,
-				"status" => $e->getMessage()
-			));
+
 		}
+
+		$jobs = $dispatcher->getJobs();
 	}
 
 	$logger->close();

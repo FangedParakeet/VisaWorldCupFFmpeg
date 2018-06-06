@@ -14,8 +14,12 @@
 	$dispatcher = new Dispatcher($dbh);
 
 	try {
-		
+
 		$jobId = $dispatcher->enqueueJob();
+
+		$command = "php " .dirname(__FILE__) . "/task.php > " . dirname(__FILE__) . "/lib/ffmpeg.log 2>nul";
+		$exec = popen("start /B " . $command, "r");
+		pclose($exec);
 
 	} catch(Exception $e){
 		$status = false;
