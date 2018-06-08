@@ -38,9 +38,8 @@
 
 							$webcamVideo = $job["webcamVideo"];
 							$arVideo = $job["arVideo"];
-							$outVideo = dirname(__FILE__) . "/videos/user/" . $job["jobId"] . "-alpha";
 
-							$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $outVideo);
+							$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $job["jobId"]);
 							if(!file_exists($mergedVideo)){
 								$error = "Failed to combine webcam and AR video!";
 								$logger->error($job["jobId"], $error);
