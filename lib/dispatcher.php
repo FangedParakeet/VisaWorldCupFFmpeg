@@ -15,6 +15,7 @@ class Dispatcher extends Slave {
 		$this->checkFilepathExists(array($chromaVid));
 
 		$deleteAfter = isset($_GET["deleteAfter"]) ? 1:0;
+		$noResize = isset($_GET["noResize"]) ? 1:0;
 
 		$index = intval($video);
 		if($index < 1 || $index > 3){
@@ -30,7 +31,7 @@ class Dispatcher extends Slave {
 
 		$id = $this->generateId($name);
 
-		$this->createJob($id, $newVideo, $newChroma, $name, $email, $deleteAfter);
+		$this->createJob($id, $newVideo, $newChroma, $name, $email, $deleteAfter, $noResize);
 
 		return $id;
 	}
@@ -67,7 +68,7 @@ class Dispatcher extends Slave {
 
 	public function getJobs(){
 		$get = $this->_dbh->prepare("SELECT `jobId`, `status`, `statusCode`, `webcamVideo`, `arVideo`, `combinedVideo`, 
-			`finalVideo`, `finalLink`, `name`, `email`, `toBeDeleted` FROM `jobs` WHERE `statusCode` > 0 
+			`finalVideo`, `finalLink`, `name`, `email`, `noResize`, `toBeDeleted` FROM `jobs` WHERE `statusCode` > 0 
 			ORDER BY `statusCode` DESC, `dateModified` ASC");
 		$get->execute();
 		$jobs = $get->fetchAll();
@@ -75,12 +76,12 @@ class Dispatcher extends Slave {
 		return $jobs;
 	}
 
-	private function createJob($id, $video, $chromaVid, $name, $email, $deleteAfter){
+	private function createJob($id, $video, $chromaVid, $name, $email, $deleteAfter, $noResize){
 		$now = time();
 
 		$create = $this->_dbh->prepare("INSERT INTO `jobs` (`jobId`, `status`, `statusCode`, `webcamVideo`, 
-			`arVideo`, `name`, `email`, `toBeDeleted`, `dateAdded`, `dateModified`) 
-			VALUES (:jobId, :status, :statusCode, :webcamVideo, :arVideo, :name, :email, :deleteAfter, :dateAdded, :dateModified)");
+			`arVideo`, `name`, `email`, `noResize`, `toBeDeleted`, `dateAdded`, `dateModified`) 
+			VALUES (:jobId, :status, :statusCode, :webcamVideo, :arVideo, :name, :email, :noResize, :deleteAfter, :dateAdded, :dateModified)");
 		$create->execute(array(
 			"jobId" 		=> $id,
 			"status" 		=> "Ready",
@@ -89,6 +90,7 @@ class Dispatcher extends Slave {
 			"arVideo" 		=> $chromaVid,
 			"name" 			=> $name,
 			"email" 		=> $email,
+			"noResize" 		=> $noResize,
 			"deleteAfter" 	=> $deleteAfter,
 			"dateAdded" 	=> date("Y-m-d H:i:s", $now),
 			"dateModified" 	=> date("Y-m-d H:i:s", $now)

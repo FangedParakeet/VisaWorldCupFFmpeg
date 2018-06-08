@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jun 06, 2018 at 12:02 PM
+-- Generation Time: Jun 08, 2018 at 02:01 PM
 -- Server version: 5.6.38
 -- PHP Version: 7.2.1
 
@@ -34,6 +34,7 @@ CREATE TABLE `jobs` (
   `combinedVideo` text COLLATE utf8mb4_bin,
   `finalVideo` text COLLATE utf8mb4_bin,
   `finalLink` text COLLATE utf8mb4_bin,
+  `noResize` int(1) NOT NULL DEFAULT '0',
   `toBeDeleted` int(1) NOT NULL DEFAULT '0',
   `dateAdded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `dateModified` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'

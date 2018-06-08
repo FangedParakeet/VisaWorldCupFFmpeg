@@ -38,8 +38,9 @@
 
 							$webcamVideo = $job["webcamVideo"];
 							$arVideo = $job["arVideo"];
+							$noResize = intval($job["noResize"]) == 0;
 
-							$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $job["jobId"]);
+							$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $job["jobId"], $noResize);
 							if(!file_exists($mergedVideo)){
 								$error = "Failed to combine webcam and AR video!";
 								$logger->error($job["jobId"], $error);
