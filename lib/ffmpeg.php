@@ -53,8 +53,9 @@ class Ffmpeg extends Slave {
 
 		// ffmpeg -i chroma3.avi -vf scale=1280:720 chroma_scaled_3.mp4
 		$scaledOut = dirname(__FILE__) . "/../videos/user/" . $job["jobId"] . "-scaledAr.mp4";
-
 		$scale = $this->_ffmpeg_path . " -i " . $chromaVid . " -vf scale=1280:720 " . $scaledOut;
+
+		$result = exec($scale, $error, $status);
 
 		$outVideo = dirname(__FILE__) . "/../videos/user/" . $jobId . "-alpha.mp4";
 		$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $chromaVid ." -filter_complex " . $this->_escape_char ."[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]" . $this->_escape_char . " -map " . $this->_escape_char . "[out]" . $this->_escape_char ." " . $outVideo;
@@ -64,6 +65,7 @@ class Ffmpeg extends Slave {
 
 		unlink($video);
 		unlink($chromaVid);
+		unlink($scaledOut);
 
 		return $outVideo;
 	}
