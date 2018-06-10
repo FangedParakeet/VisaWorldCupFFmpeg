@@ -12,3 +12,4 @@ lib/ffmpeg.log
 videos/user/*
 vendor/*
 task.log
+lost.php
