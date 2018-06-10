@@ -140,7 +140,7 @@
 				}
 
 				
-			} catch(Exception $e){
+			} catch(\Exception $e){
 				$logger->error($job["jobId"], $e->getMessage());
 				$dispatcher->updateJob($job["jobId"], array(
 					"statusCode" => -1,
