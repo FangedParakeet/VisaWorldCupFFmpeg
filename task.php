@@ -24,6 +24,8 @@
 	$dispatcher = new Dispatcher($dbh);
 	$jobs = $dispatcher->getJobs();
 
+	$logger->message("N/A", "Starting task with " . count($jobs) . " jobs...");
+
 	while(count($jobs) > 0){
 
 		foreach ($jobs as $job) {
@@ -153,4 +155,5 @@
 		$jobs = $dispatcher->getJobs();
 	}
 
+	$logger->message("N/A", "Task complete!");
 	$logger->close();
