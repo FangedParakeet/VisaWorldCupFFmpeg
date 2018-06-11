@@ -10,7 +10,7 @@ class GoogleDrive {
 	private $_client_id, $_client_secret;
 
 	public function __construct(){
-		$credentials = parse_ini_file(__DIR__ . self::CREDENTIALS_FILE, true);
+		$credentials = parse_ini_file(dirname(__FILE__) . self::CREDENTIALS_FILE, true);
 		$this->_client_id = $credentials["drive"]["client_id"];
 		$this->_client_secret = $credentials["drive"]["client_secret"];
 	}
