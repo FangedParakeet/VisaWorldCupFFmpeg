@@ -24,10 +24,19 @@ class Dispatcher extends Slave {
 
 		$video = dirname(__FILE__) . "/../videos/user/webcam_SFTS_" . $video . ".mp4";
 
-		$newVideo = dirname(__FILE__) . "/../videos/user/webcam_USER_" . time() . ".mp4";
-		$newChroma = dirname(__FILE__) . "/../videos/user/AR_Video_USER_" . time() . ".mp4";
-		rename($video, $newVideo);
-		rename($chromaVid, $newChroma);
+		if(file_exists($video)){
+			$newVideo = dirname(__FILE__) . "/../videos/user/webcam_USER_" . time() . ".mp4";
+			rename($video, $newVideo);			
+		} else {
+			$newVideo = false;
+		}
+
+		if(file_exists($chromaVid)){
+			$newChroma = dirname(__FILE__) . "/../videos/user/AR_Video_USER_" . time() . ".mp4";
+			rename($chromaVid, $newChroma);			
+		} else {
+			$newChroma = false;
+		}
 
 		$id = $this->generateId($name);
 
@@ -79,13 +88,28 @@ class Dispatcher extends Slave {
 	private function createJob($id, $video, $chromaVid, $name, $email, $deleteAfter, $noResize){
 		$now = time();
 
+		$status = "Ready";
+		$statusCode = 1;
+
+		if($video == false){
+			$status = "Webcam video not present";
+			$statusCode = -1;
+			$video = null;
+		}
+
+		if($chromaVid == false){
+			$status = "Chroma video not present";
+			$statusCode = -1;
+			$chromaVid = null;
+		}
+
 		$create = $this->_dbh->prepare("INSERT INTO `jobs` (`jobId`, `status`, `statusCode`, `webcamVideo`, 
 			`arVideo`, `name`, `email`, `noResize`, `toBeDeleted`, `dateAdded`, `dateModified`) 
 			VALUES (:jobId, :status, :statusCode, :webcamVideo, :arVideo, :name, :email, :noResize, :deleteAfter, :dateAdded, :dateModified)");
 		$create->execute(array(
 			"jobId" 		=> $id,
-			"status" 		=> "Ready",
-			"statusCode" 	=> 1,
+			"status" 		=> $status,
+			"statusCode" 	=> $statusCode,
 			"webcamVideo" 	=> $video,
 			"arVideo" 		=> $chromaVid,
 			"name" 			=> $name,
