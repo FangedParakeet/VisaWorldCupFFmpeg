@@ -45,8 +45,8 @@
 							$mergedVideo = $ffmpeg->chromakeyVideoMerge($webcamVideo, $arVideo, $job["jobId"], $noResize);
 							if(!file_exists($mergedVideo)){
 								$error = "Failed to combine webcam and AR video!";
+								
 								$logger->error($job["jobId"], $error);
-
 								$dispatcher->updateJob($job["jobId"], array(
 									"statusCode" => -1,
 									"status" => $error,
@@ -67,8 +67,8 @@
 						$finalVideo = $ffmpeg->addVideoBookend($mergedVideo, $job["jobId"]);
 						if(!file_exists($finalVideo)){
 							$error = "Failed to add client logo to video!";
+							
 							$logger->error($job["jobId"], $error);
-
 							$dispatcher->updateJob($job["jobId"], array(
 								"statusCode" => -1,
 								"status" => $error,
@@ -113,8 +113,14 @@
 								));	
 
 							} else {
+								$error = "Video upload failed!";
 
-								$logger->error($job["jobId"], "Video upload failed!");
+								$logger->error($job["jobId"], $error);
+								$dispatcher->updateJob($job["jobId"], array(
+									"statusCode" => -1,
+									"status" => $error,
+									"dateModified" => date("Y-m-d H:i:s")
+								));
 								break;
 
 							}
@@ -146,7 +152,8 @@
 				$logger->error($job["jobId"], $e->getMessage());
 				$dispatcher->updateJob($job["jobId"], array(
 					"statusCode" => -1,
-					"status" => $e->getMessage()
+					"status" => $e->getMessage(),
+					"dateModified" => date("Y-m-d H:i:s")
 				));
 			}
 
