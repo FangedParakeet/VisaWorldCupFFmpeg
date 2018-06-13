@@ -66,9 +66,11 @@ class Ffmpeg extends Slave {
 		// Add logging
 		$result = exec($command, $error, $status);
 
-		unlink($video);
-		unlink($chromaVid);
-		unlink($scaledOut);
+		if(file_exists($outVideo)){
+			unlink($video);
+			unlink($chromaVid);
+			unlink($scaledOut);			
+		}
 
 		return $outVideo;
 	}
