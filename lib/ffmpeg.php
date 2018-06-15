@@ -44,9 +44,6 @@ class Ffmpeg extends Slave {
 	}
 
 	public function chromakeyVideoMerge($video, $chromaVid, $jobId, $noResize){
-		if(!file_exists($video)){
-			throw new Exception("Could not find webcam video: " . $video);
-		}
 		if(!file_exists($chromaVid)){
 			throw new Exception("Could not find AR video: " . $chromaVid);
 		}
@@ -56,20 +53,27 @@ class Ffmpeg extends Slave {
 			$scale = $this->_ffmpeg_path . " -i " . $chromaVid . " -vf scale=1280:720 " . $scaledOut;			
 
 			$result = exec($scale, $error, $status);
+
+			if(file_exists($scaledOut)){
+				unlink($chromaVid);
+			}
 		} else {
 			$scaledOut = $chromaVid;
 		}
 
-		$outVideo = dirname(__FILE__) . "/../videos/user/" . $jobId . "-alpha.mp4";
-		$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $scaledOut ." -filter_complex " . $this->_escape_char ."[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]" . $this->_escape_char . " -map " . $this->_escape_char . "[out]" . $this->_escape_char ." " . $outVideo;
+		if(file_exists($video)){
+			$outVideo = dirname(__FILE__) . "/../videos/user/" . $jobId . "-alpha.mp4";
+			$command = $this->_ffmpeg_path . " -i " . $video . " -i " . $scaledOut ." -filter_complex " . $this->_escape_char ."[1:v]colorkey=0x" . self::CHROMAKEY . ":0.3:0.2[ckout];[0:v][ckout]overlay[out]" . $this->_escape_char . " -map " . $this->_escape_char . "[out]" . $this->_escape_char ." " . $outVideo;
 
-		// Add logging
-		$result = exec($command, $error, $status);
+			// Add logging
+			$result = exec($command, $error, $status);
 
-		if(file_exists($outVideo)){
-			unlink($video);
-			unlink($chromaVid);
-			unlink($scaledOut);			
+			if(file_exists($outVideo)){
+				unlink($video);
+				unlink($scaledOut);
+			}
+		} else {
+			$outVideo = $scaledOut;
 		}
 
 		return $outVideo;

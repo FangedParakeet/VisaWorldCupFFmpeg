@@ -9,27 +9,34 @@ class Dispatcher extends Slave {
 	}
 
 	public function enqueueJob(){
-		list($video, $chromaVid, $name, $email) = $this->checkGet(array("video", "chroma", "name", "email"));
-		$this->checkEmpty(array($video, $chromaVid, $name, $email));
+		list($chromaVid, $name, $email) = $this->checkGet(array("chroma", "name", "email"));
+		$this->checkEmpty(array($chromaVid, $name, $email));
 		$this->checkEmail(array($email));
 		$this->checkFilepathExists(array($chromaVid));
 
 		$deleteAfter = isset($_GET["deleteAfter"]) ? 1:0;
 		$noResize = isset($_GET["noResize"]) ? 1:0;
 
-		$index = intval($video);
-		if($index < 1 || $index > 3){
-			throw new Exception("Webcam video index must be in range of 1-3");
-		}
 
-		$video = dirname(__FILE__) . "/../videos/user/webcam_SFTS_" . $video . ".mp4";
+		if(isset($_GET["video"])){
+			$video = $_GET["video"];
+			$index = intval($video);
+			if($index < 1 || $index > 3){
+				throw new Exception("Webcam video index must be in range of 1-3");
+			}
 
-		if(file_exists($video)){
-			$newVideo = dirname(__FILE__) . "/../videos/user/webcam_USER_" . time() . ".mp4";
-			rename($video, $newVideo);			
+			$video = dirname(__FILE__) . "/../videos/user/webcam_SFTS_" . $video . ".mp4";
+
+			if(file_exists($video)){
+				$newVideo = dirname(__FILE__) . "/../videos/user/webcam_USER_" . time() . ".mp4";
+				rename($video, $newVideo);			
+			} else {
+				$newVideo = false;
+			}
 		} else {
-			$newVideo = false;
+			$newVideo = null;
 		}
+
 
 		if(file_exists($chromaVid)){
 			$newChroma = dirname(__FILE__) . "/../videos/user/AR_Video_USER_" . time() . ".mp4";
@@ -91,7 +98,7 @@ class Dispatcher extends Slave {
 		$status = "Ready";
 		$statusCode = 1;
 
-		if($video == false){
+		if($video === false){
 			$status = "Webcam video not present";
 			$statusCode = -1;
 			$video = null;
