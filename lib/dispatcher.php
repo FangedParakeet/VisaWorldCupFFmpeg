@@ -18,24 +18,24 @@ class Dispatcher extends Slave {
 		$noResize = isset($_GET["noResize"]) ? 1:0;
 
 
-		if(isset($_GET["video"])){
-			$video = $_GET["video"];
-			$index = intval($video);
-			if($index < 1 || $index > 3){
-				throw new Exception("Webcam video index must be in range of 1-3");
-			}
+		// if(isset($_GET["video"])){
+		// 	$video = $_GET["video"];
+		// 	$index = intval($video);
+		// 	if($index < 1 || $index > 3){
+		// 		throw new Exception("Webcam video index must be in range of 1-3");
+		// 	}
 
-			$video = dirname(__FILE__) . "/../videos/user/webcam_SFTS_" . $video . ".mp4";
+		// 	$video = dirname(__FILE__) . "/../videos/user/webcam_SFTS_" . $video . ".mp4";
 
-			if(file_exists($video)){
-				$newVideo = dirname(__FILE__) . "/../videos/user/webcam_USER_" . time() . ".mp4";
-				rename($video, $newVideo);			
-			} else {
-				$newVideo = false;
-			}
-		} else {
+		// 	if(file_exists($video)){
+		// 		$newVideo = dirname(__FILE__) . "/../videos/user/webcam_USER_" . time() . ".mp4";
+		// 		rename($video, $newVideo);			
+		// 	} else {
+		// 		$newVideo = false;
+		// 	}
+		// } else {
 			$newVideo = null;
-		}
+		// }
 
 
 		if(file_exists($chromaVid)){
