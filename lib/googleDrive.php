@@ -5,6 +5,7 @@ class GoogleDrive {
 	const REFRESH_TOKEN = "1/vYXJgQVx2ZQhXq1v52rC3mM7fVrBqWJHGyw0ErmVAjzIEbxZyRtC5MPCXW4XjA1a",
 		REFRESH_URL = "https://www.googleapis.com/oauth2/v4/token",
 		UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+		PARENT_ID = "1xkNYTBYg6Fa3zLNIb9fWY-lwH6Xhz8LC",
 		CREDENTIALS_FILE = "/../../../.credentials/google.ini";
 
 	private $_client_id, $_client_secret;
@@ -50,7 +51,8 @@ class GoogleDrive {
 		$body = $prefix . $boundary . $endl
 			. "Content-Type: application/json; charset=UTF-8" . $endl . $endl
 			. "{" . $endl 
-			. "\t" . "\"name\": \"" . basename($media) . "\"" . $endl
+			. "\t" . "\"name\": \"" . basename($media) . "\"," . $endl
+			. "\t" . "\"parents\": [\"" . self::PARENT_ID . "\"]" . $endl
 			. "}" . $endl . $endl
 			. $prefix . $boundary . $endl
 			. "Content-Type: video/mp4;" . $endl . $endl
